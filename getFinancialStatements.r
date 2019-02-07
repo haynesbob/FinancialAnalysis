@@ -7,14 +7,14 @@ getFinancialStatements <- function(tickerSymbol){
     install.packages("rvest")
     library(rvest)
   }
-
+  finLists <- vector("list",length(tickerSymbol))
   #Scrape figures for balance sheet, income statement, and statement of cash flows from yahoo finance
-  baseurl <- "https://finance.yahoo.com/quote/"
+  baseUrl <- "https://finance.yahoo.com/quote/"
   for (i in 1:length(tickerSymbol)) {
     tryCatch(
       {
         #Balance Sheet
-        url <- paste0(baseurl,tickerSymbol[i],"/balance-sheet?p=",tickerSymbol[i])
+        url <- paste0(baseUrl,tickerSymbol[i],"/balance-sheet?p=",tickerSymbol[i])
         wahis.session <- html_session(url)
         p <- wahis.session %>%
           html_nodes(xpath = '//*[@id="Col1-1-Financials-Proxy"]/section/div[3]/table') %>%
@@ -31,7 +31,7 @@ getFinancialStatements <- function(tickerSymbol){
         df1 <- balanceSheet
         
         #Income Statement
-        url <- paste0(baseurl,tickerSymbol[i],"/financials?p=",tickerSymbol[i])
+        url <- paste0(baseUrl,tickerSymbol[i],"/financials?p=",tickerSymbol[i])
         wahis.session <- html_session(url)                                
         p <- wahis.session %>%
           html_nodes(xpath = '//*[@id="Col1-1-Financials-Proxy"]/section/div[3]/table') %>%
@@ -48,7 +48,7 @@ getFinancialStatements <- function(tickerSymbol){
         df2 <- incomeStatement
   
         #Statement of Cash Flows
-        url <- paste0(baseurl,tickerSymbol[i],"/cash-flow?p=",tickerSymbol[i])
+        url <- paste0(baseUrl,tickerSymbol[i],"/cash-flow?p=",tickerSymbol[i])
         wahis.session <- html_session(url)
         p <- wahis.session %>%
           html_nodes(xpath = '//*[@id="Col1-1-Financials-Proxy"]/section/div[3]/table') %>%
@@ -66,7 +66,8 @@ getFinancialStatements <- function(tickerSymbol){
         
         #Create list from temp data.frames
         assign(paste0(tickerSymbol[i],'.financials'),value = list(BalanceSheet= df1,IncomeStatement = df2,CashFlow = df3),envir = parent.frame())
-      },
+        
+        },
       error = function(cond){
         message(tickerSymbol[i], "gives ",cond)
       }
